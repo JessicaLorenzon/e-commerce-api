@@ -1,6 +1,7 @@
-package com.lorenzon.e_commerce_api.domain.order;
+package com.lorenzon.e_commerce_api.entities.order;
 
-import com.lorenzon.e_commerce_api.domain.orderItem.OrderItem;
+import com.lorenzon.e_commerce_api.entities.orderItem.OrderItem;
+import com.lorenzon.e_commerce_api.entities.payment.Payment;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,4 +31,7 @@ public class Order {
 
     @OneToMany(mappedBy = "order")
     private List<OrderItem> items = new ArrayList<>();
+
+    @OneToOne(mappedBy = "order")
+    private Payment payment;
 }

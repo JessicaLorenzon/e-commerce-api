@@ -1,7 +1,7 @@
-package com.lorenzon.e_commerce_api.domain.orderItem;
+package com.lorenzon.e_commerce_api.entities.orderItem;
 
-import com.lorenzon.e_commerce_api.domain.order.Order;
-import com.lorenzon.e_commerce_api.domain.product.Product;
+import com.lorenzon.e_commerce_api.entities.order.Order;
+import com.lorenzon.e_commerce_api.entities.product.Product;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

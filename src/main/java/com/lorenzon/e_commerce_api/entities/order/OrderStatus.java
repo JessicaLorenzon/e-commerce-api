@@ -1,4 +1,4 @@
-package com.lorenzon.e_commerce_api.domain.order;
+package com.lorenzon.e_commerce_api.entities.order;
 
 public enum OrderStatus {
 
