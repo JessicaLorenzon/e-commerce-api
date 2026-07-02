@@ -37,7 +37,8 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public List<OrderResponseDTO> findAll() {
-        List<Order> orders = orderRepository.findAll();
+        User user = (User) userRepository.findByEmail(getLoggedUser());
+        List<Order> orders = orderRepository.findAllByClient(user);
         return orders.stream().map(mapper::toResponseDTO).toList();
     }
 
@@ -64,20 +65,11 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderResponseDTO update(Long id, OrderRequestDTO orderRequestDTO) {
-        Order order = orderRepository.getReferenceById(id);
-        order.getItems().clear();
-        for (OrderItemRequestDTO itemDTO : orderRequestDTO.items()) {
-            Product product = productRepository.getReferenceById(itemDTO.productId());
-            OrderItem item = new OrderItem(product, itemDTO.quantity(), product.getPrice());
-            order.addItem(item);
-        }
+    public OrderResponseDTO cancel(Long id) {
+        User user = (User) userRepository.findByEmail(getLoggedUser());
+        Order order = orderRepository.findByClientAndId(user, id);
+        order.setStatus(OrderStatus.CANCELED);
         return mapper.toResponseDTO(order);
-    }
-
-    @Transactional
-    public void delete(Long id) {
-        orderRepository.deleteById(id);
     }
 
     private String getLoggedUser() {
