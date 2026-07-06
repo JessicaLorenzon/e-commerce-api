@@ -1,6 +1,7 @@
 package com.lorenzon.e_commerce_api.controllers;
 
 import com.lorenzon.e_commerce_api.dto.ProductRequestDTO;
+import com.lorenzon.e_commerce_api.dto.ProductResponseAdminDTO;
 import com.lorenzon.e_commerce_api.dto.ProductResponseDTO;
 import com.lorenzon.e_commerce_api.services.ProductService;
 import jakarta.validation.Valid;
@@ -29,29 +30,29 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponseDTO> findProductById(@PathVariable Long id) {
-        ProductResponseDTO responseDTO = service.findById(id);
+        ProductResponseDTO responseDTO = service.searchById(id);
         return ResponseEntity.ok(responseDTO);
     }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ProductResponseDTO> saveProduct(@RequestBody ProductRequestDTO productRequestDTO) {
-        ProductResponseDTO responseDTO = service.insert(productRequestDTO);
+    public ResponseEntity<ProductResponseAdminDTO> saveProduct(@RequestBody ProductRequestDTO productRequestDTO) {
+        ProductResponseAdminDTO responseDTO = service.insert(productRequestDTO);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(responseDTO.id()).toUri();
         return ResponseEntity.created(uri).body(responseDTO);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ProductResponseDTO> updateProduct(@PathVariable Long id, @RequestBody @Valid ProductRequestDTO productRequestDTO) {
-        ProductResponseDTO responseDTO = service.update(id, productRequestDTO);
+    public ResponseEntity<ProductResponseAdminDTO> updateProduct(@PathVariable Long id, @RequestBody @Valid ProductRequestDTO productRequestDTO) {
+        ProductResponseAdminDTO responseDTO = service.update(id, productRequestDTO);
         return ResponseEntity.ok(responseDTO);
     }
 
-    @DeleteMapping("/{id}")
+    @PatchMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
-        service.delete(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<ProductResponseAdminDTO> disableProduct(@PathVariable Long id) {
+        ProductResponseAdminDTO responseDTO = service.disable(id);
+        return ResponseEntity.ok(responseDTO);
     }
 }

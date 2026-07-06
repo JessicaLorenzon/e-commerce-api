@@ -1,8 +1,10 @@
 package com.lorenzon.e_commerce_api.services;
 
 import com.lorenzon.e_commerce_api.dto.ProductRequestDTO;
+import com.lorenzon.e_commerce_api.dto.ProductResponseAdminDTO;
 import com.lorenzon.e_commerce_api.dto.ProductResponseDTO;
 import com.lorenzon.e_commerce_api.entities.product.Product;
+import com.lorenzon.e_commerce_api.exceptions.ResourceNotFoundException;
 import com.lorenzon.e_commerce_api.mappers.ProductMapper;
 import com.lorenzon.e_commerce_api.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,27 +29,33 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public ProductResponseDTO findById(Long id) {
-        Product product = repository.getReferenceById(id);
+    public ProductResponseDTO searchById(Long id) {
+        Product product = findById(id);
         return mapper.toResponseDTO(product);
     }
 
     @Transactional
-    public ProductResponseDTO insert(ProductRequestDTO productRequestDTO) {
+    public ProductResponseAdminDTO insert(ProductRequestDTO productRequestDTO) {
         Product product = mapper.toEntity(productRequestDTO);
         product = repository.save(product);
-        return mapper.toResponseDTO(product);
+        return mapper.toResponseAdminDTO(product);
     }
 
     @Transactional
-    public ProductResponseDTO update(Long id, ProductRequestDTO productRequestDTO) {
-        Product product = repository.getReferenceById(id);
+    public ProductResponseAdminDTO update(Long id, ProductRequestDTO productRequestDTO) {
+        Product product = findById(id);
         mapper.updateEntity(productRequestDTO, product);
-        return mapper.toResponseDTO(product);
+        return mapper.toResponseAdminDTO(product);
     }
 
     @Transactional
-    public void delete(Long id) {
-        repository.deleteById(id);
+    public ProductResponseAdminDTO disable(Long id) {
+        Product product = findById(id);
+        product.setStockQuantity(0);
+        return mapper.toResponseAdminDTO(product);
+    }
+
+    public Product findById(Long id) {
+        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Product", id));
     }
 }
