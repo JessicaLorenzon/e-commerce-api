@@ -8,6 +8,11 @@ import com.lorenzon.e_commerce_api.entities.order.OrderStatus;
 import com.lorenzon.e_commerce_api.entities.orderItem.OrderItem;
 import com.lorenzon.e_commerce_api.entities.product.Product;
 import com.lorenzon.e_commerce_api.entities.user.User;
+import com.lorenzon.e_commerce_api.entities.user.UserRole;
+import com.lorenzon.e_commerce_api.exceptions.AlreadyCanceledException;
+import com.lorenzon.e_commerce_api.exceptions.InsufficientStockException;
+import com.lorenzon.e_commerce_api.exceptions.ResourceNotFoundException;
+import com.lorenzon.e_commerce_api.exceptions.UserForbiddenException;
 import com.lorenzon.e_commerce_api.mappers.OrderMapper;
 import com.lorenzon.e_commerce_api.repositories.OrderRepository;
 import com.lorenzon.e_commerce_api.repositories.ProductRepository;
@@ -19,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class OrderService {
@@ -37,14 +43,18 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public List<OrderResponseDTO> findAll() {
-        User user = (User) userRepository.findByEmail(getLoggedUser());
-        List<Order> orders = orderRepository.findAllByClient(user);
+        User user = getLoggedUser();
+        List<Order> orders = user.getRole() == UserRole.ADMIN
+                ? orderRepository.findAll()
+                : orderRepository.findAllByClient(user);
         return orders.stream().map(mapper::toResponseDTO).toList();
     }
 
     @Transactional(readOnly = true)
     public OrderResponseDTO findById(Long id) {
-        Order order = orderRepository.getReferenceById(id);
+        User user = getLoggedUser();
+        Order order = findEntityById(id);
+        validateAccess(order, user);
         return mapper.toResponseDTO(order);
     }
 
@@ -53,10 +63,11 @@ public class OrderService {
         Order order = new Order();
         order.setMoment(Instant.now());
         order.setStatus(OrderStatus.WAITING_PAYMENT);
-        User user = (User) userRepository.findByEmail(getLoggedUser());
+        User user = getLoggedUser();
         order.setClient(user);
         for (OrderItemRequestDTO itemRequestDTO : orderRequestDTO.items()) {
             Product product = productRepository.getReferenceById(itemRequestDTO.productId());
+            updateStock(product, itemRequestDTO.quantity());
             OrderItem item = new OrderItem(order, product, itemRequestDTO.quantity(), product.getPrice());
             order.addItem(item);
         }
@@ -66,13 +77,41 @@ public class OrderService {
 
     @Transactional
     public OrderResponseDTO cancel(Long id) {
-        User user = (User) userRepository.findByEmail(getLoggedUser());
-        Order order = orderRepository.findByClientAndId(user, id);
+        User user = getLoggedUser();
+        Order order = findEntityById(id);
+        if (order.getStatus() == OrderStatus.CANCELED) {
+            throw new AlreadyCanceledException();
+        }
+        validateAccess(order, user);
+        for (OrderItem orderItem : order.getItems()) {
+            Product product = orderItem.getProduct();
+            product.setStockQuantity(product.getStockQuantity() + orderItem.getQuantity());
+        }
         order.setStatus(OrderStatus.CANCELED);
         return mapper.toResponseDTO(order);
     }
 
-    private String getLoggedUser() {
-        return SecurityContextHolder.getContext().getAuthentication().getName();
+    private Order findEntityById(Long id) {
+        return orderRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Order", id));
+    }
+
+    private void updateStock(Product product, Integer quantity) {
+        if (product.getStockQuantity() < quantity) {
+            throw new InsufficientStockException(product.getName());
+        }
+        product.setStockQuantity(product.getStockQuantity() - quantity);
+    }
+
+    private void validateAccess(Order order, User user) {
+        boolean isAdmin = user.getRole() == UserRole.ADMIN;
+        boolean isOwner = order.getClient().getId().equals(user.getId());
+        if (!isAdmin && !isOwner) {
+            throw new UserForbiddenException();
+        }
+    }
+
+    private User getLoggedUser() {
+        String email = Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getName();
+        return (User) userRepository.findByEmail(email);
     }
 }
