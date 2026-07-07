@@ -1,0 +1,8 @@
+CREATE TABLE tb_carts (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id BIGINT NOT NULL UNIQUE,
+
+    CONSTRAINT fk_cart_user
+    FOREIGN KEY (user_id)
+    REFERENCES tb_users(id)
+)

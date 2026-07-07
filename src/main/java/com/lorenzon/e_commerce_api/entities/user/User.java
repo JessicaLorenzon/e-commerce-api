@@ -1,5 +1,6 @@
 package com.lorenzon.e_commerce_api.entities.user;
 
+import com.lorenzon.e_commerce_api.entities.cart.Cart;
 import com.lorenzon.e_commerce_api.entities.order.Order;
 import jakarta.persistence.*;
 import lombok.*;
@@ -33,6 +34,9 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy = "user")
     private final List<Order> orders = new ArrayList<>();
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Cart cart;
 
     public User(String fullName, String email, String password, UserRole role) {
         this.fullName = fullName;
