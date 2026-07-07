@@ -38,8 +38,8 @@ public class Order {
     private Payment payment;
 
     @ManyToOne
-    @JoinColumn(name = "client_id")
-    private User client;
+    @JoinColumn(name = "user_id")
+    private User user;
 
     public void addItem(OrderItem item) {
         items.add(item);

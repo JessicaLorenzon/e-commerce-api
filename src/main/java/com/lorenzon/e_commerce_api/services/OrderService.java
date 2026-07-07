@@ -46,7 +46,7 @@ public class OrderService {
         User user = getLoggedUser();
         List<Order> orders = user.getRole() == UserRole.ADMIN
                 ? orderRepository.findAll()
-                : orderRepository.findAllByClient(user);
+                : orderRepository.findAllByUser(user);
         return orders.stream().map(mapper::toResponseDTO).toList();
     }
 
@@ -64,7 +64,7 @@ public class OrderService {
         order.setMoment(Instant.now());
         order.setStatus(OrderStatus.WAITING_PAYMENT);
         User user = getLoggedUser();
-        order.setClient(user);
+        order.setUser(user);
         for (OrderItemRequestDTO itemRequestDTO : orderRequestDTO.items()) {
             Product product = productRepository.getReferenceById(itemRequestDTO.productId());
             updateStock(product, itemRequestDTO.quantity());
@@ -104,7 +104,7 @@ public class OrderService {
 
     private void validateAccess(Order order, User user) {
         boolean isAdmin = user.getRole() == UserRole.ADMIN;
-        boolean isOwner = order.getClient().getId().equals(user.getId());
+        boolean isOwner = order.getUser().getId().equals(user.getId());
         if (!isAdmin && !isOwner) {
             throw new UserForbiddenException();
         }

@@ -31,7 +31,7 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
-    @OneToMany(mappedBy = "client")
+    @OneToMany(mappedBy = "user")
     private final List<Order> orders = new ArrayList<>();
 
     public User(String fullName, String email, String password, UserRole role) {

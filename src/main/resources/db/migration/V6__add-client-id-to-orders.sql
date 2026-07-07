@@ -1,7 +1,7 @@
 ALTER TABLE tb_orders
-ADD COLUMN client_id BIGINT;
+ADD COLUMN user_id BIGINT;
 
 ALTER TABLE tb_orders
 ADD CONSTRAINT fk_order_client
-FOREIGN KEY (client_id)
+FOREIGN KEY (user_id)
 REFERENCES tb_users (id);
