@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "tb_cart_items")
 @Getter
@@ -27,4 +29,9 @@ public class CartItem {
     @ManyToOne
     @JoinColumn(name = "cart_id")
     private Cart cart;
+
+    public BigDecimal getSubTotal() {
+        return product.getPrice().multiply(BigDecimal.valueOf(quantity));
+    }
+
 }

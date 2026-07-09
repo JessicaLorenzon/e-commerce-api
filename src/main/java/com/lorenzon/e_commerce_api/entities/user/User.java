@@ -35,7 +35,7 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user")
     private final List<Order> orders = new ArrayList<>();
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "user")
     private Cart cart;
 
     public User(String fullName, String email, String password, UserRole role) {
