@@ -6,6 +6,7 @@ import com.lorenzon.e_commerce_api.entities.cart.Cart;
 import com.lorenzon.e_commerce_api.entities.cartItem.CartItem;
 import com.lorenzon.e_commerce_api.entities.product.Product;
 import com.lorenzon.e_commerce_api.entities.user.User;
+import com.lorenzon.e_commerce_api.exceptions.CartOrItemNotFoundException;
 import com.lorenzon.e_commerce_api.exceptions.InsufficientStockException;
 import com.lorenzon.e_commerce_api.mappers.CartMapper;
 import com.lorenzon.e_commerce_api.repositories.CartItemRepository;
@@ -64,6 +65,24 @@ public class CartService {
     }
 
     @Transactional
+    public CartResponseDTO update(CartItemRequestDTO cartItemRequestDTO) {
+        User user = getLoggedUser();
+        Cart cart = user.getCart();
+        if (cart == null) {
+            throw new CartOrItemNotFoundException();
+        }
+        Product product = productService.findById(cartItemRequestDTO.productId());
+        CartItem existingItem = cartItemRepository.findByCartIdAndProductId(cart.getId(), product.getId());
+        if (existingItem == null) {
+            throw new CartOrItemNotFoundException();
+        }
+        validateStock(product, cartItemRequestDTO.quantity());
+        existingItem.setQuantity(cartItemRequestDTO.quantity());
+        cartRepository.save(cart);
+        return mapper.toCartResponseDTO(cart);
+    }
+
+    @Transactional
     public void delete(Long productId) {
         User user = getLoggedUser();
         Cart cart = user.getCart();
@@ -75,6 +94,7 @@ public class CartService {
         if (cart == null) {
             cart = new Cart();
             cart.setUser(user);
+            user.setCart(cart);
         }
         return cart;
     }
