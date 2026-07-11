@@ -63,6 +63,13 @@ public class CartService {
         return mapper.toCartResponseDTO(cart);
     }
 
+    @Transactional
+    public void delete(Long productId) {
+        User user = getLoggedUser();
+        Cart cart = user.getCart();
+        cartItemRepository.deleteByCartIdAndProductId(cart.getId(), productId);
+    }
+
     private Cart getOrCreateCart(User user) {
         Cart cart = user.getCart();
         if (cart == null) {

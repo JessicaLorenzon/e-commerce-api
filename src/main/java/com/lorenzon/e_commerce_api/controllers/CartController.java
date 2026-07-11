@@ -30,4 +30,10 @@ public class CartController {
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(responseDTO.id()).toUri();
         return ResponseEntity.created(uri).body(responseDTO);
     }
+
+    @DeleteMapping("/{productId}")
+    public ResponseEntity<Void> deleteItemCart(@PathVariable Long productId) {
+        service.delete(productId);
+        return ResponseEntity.noContent().build();
+    }
 }
