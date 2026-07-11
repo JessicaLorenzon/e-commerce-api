@@ -6,10 +6,7 @@ import com.lorenzon.e_commerce_api.services.CartService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
@@ -20,6 +17,12 @@ public class CartController {
 
     @Autowired
     private CartService service;
+
+    @GetMapping
+    public ResponseEntity<CartResponseDTO> getCart() {
+        CartResponseDTO responseDTO = service.getCart();
+        return ResponseEntity.ok(responseDTO);
+    }
 
     @PostMapping
     public ResponseEntity<CartResponseDTO> insertItemCart(@RequestBody @Valid CartItemRequestDTO cartItemRequestDTO) {

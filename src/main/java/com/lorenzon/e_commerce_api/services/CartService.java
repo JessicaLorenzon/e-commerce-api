@@ -36,6 +36,13 @@ public class CartService {
     @Autowired
     private CartMapper mapper;
 
+    @Transactional(readOnly = true)
+    public CartResponseDTO getCart() {
+        User user = getLoggedUser();
+        Cart cart = getOrCreateCart(user);
+        return mapper.toCartResponseDTO(cart);
+    }
+
     @Transactional
     public CartResponseDTO insert(CartItemRequestDTO cartItemRequestDTO) {
         User user = getLoggedUser();
