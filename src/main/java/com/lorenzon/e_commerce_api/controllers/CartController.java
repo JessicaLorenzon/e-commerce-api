@@ -2,6 +2,7 @@ package com.lorenzon.e_commerce_api.controllers;
 
 import com.lorenzon.e_commerce_api.dto.CartItemRequestDTO;
 import com.lorenzon.e_commerce_api.dto.CartResponseDTO;
+import com.lorenzon.e_commerce_api.dto.OrderResponseDTO;
 import com.lorenzon.e_commerce_api.services.CartService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,5 +42,10 @@ public class CartController {
     public ResponseEntity<Void> deleteItemCart(@PathVariable Long productId) {
         service.delete(productId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/checkout")
+    public ResponseEntity<OrderResponseDTO> checkout() {
+        return ResponseEntity.ok(service.checkout());
     }
 }

@@ -1,8 +1,8 @@
 package com.lorenzon.e_commerce_api.services;
 
-import com.lorenzon.e_commerce_api.dto.OrderItemRequestDTO;
-import com.lorenzon.e_commerce_api.dto.OrderRequestDTO;
 import com.lorenzon.e_commerce_api.dto.OrderResponseDTO;
+import com.lorenzon.e_commerce_api.entities.cart.Cart;
+import com.lorenzon.e_commerce_api.entities.cartItem.CartItem;
 import com.lorenzon.e_commerce_api.entities.order.Order;
 import com.lorenzon.e_commerce_api.entities.order.OrderStatus;
 import com.lorenzon.e_commerce_api.entities.orderItem.OrderItem;
@@ -59,20 +59,9 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderResponseDTO insert(OrderRequestDTO orderRequestDTO) {
-        Order order = new Order();
-        order.setMoment(Instant.now());
-        order.setStatus(OrderStatus.WAITING_PAYMENT);
-        User user = getLoggedUser();
-        order.setUser(user);
-        for (OrderItemRequestDTO itemRequestDTO : orderRequestDTO.items()) {
-            Product product = productRepository.getReferenceById(itemRequestDTO.productId());
-            updateStock(product, itemRequestDTO.quantity());
-            OrderItem item = new OrderItem(order, product, itemRequestDTO.quantity(), product.getPrice());
-            order.addItem(item);
-        }
-        order = orderRepository.save(order);
-        return mapper.toResponseDTO(order);
+    public Order createOrder(Cart cart) {
+        Order order = buildOrder(cart);
+        return orderRepository.save(order);
     }
 
     @Transactional
@@ -89,6 +78,20 @@ public class OrderService {
         }
         order.setStatus(OrderStatus.CANCELED);
         return mapper.toResponseDTO(order);
+    }
+
+    public Order buildOrder(Cart cart) {
+        Order order = new Order();
+        order.setMoment(Instant.now());
+        order.setStatus(OrderStatus.WAITING_PAYMENT);
+        order.setUser(cart.getUser());
+        for (CartItem cartItem : cart.getItems()) {
+            Product product = cartItem.getProduct();
+            updateStock(product, cartItem.getQuantity());
+            OrderItem item = new OrderItem(order, product, cartItem.getQuantity(), product.getPrice());
+            order.addItem(item);
+        }
+        return order;
     }
 
     private Order findEntityById(Long id) {

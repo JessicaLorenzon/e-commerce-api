@@ -30,13 +30,6 @@ public class OrderController {
         return ResponseEntity.ok(responseDTO);
     }
 
-    @PostMapping
-    public ResponseEntity<OrderResponseDTO> saveOrder(@RequestBody OrderRequestDTO orderRequestDTO) {
-        OrderResponseDTO responseDTO = service.insert(orderRequestDTO);
-        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(responseDTO.id()).toUri();
-        return ResponseEntity.created(uri).body(responseDTO);
-    }
-
     @PatchMapping("/{id}")
     public ResponseEntity<OrderResponseDTO> cancelOrder(@PathVariable Long id) {
         OrderResponseDTO responseDTO = service.cancel(id);

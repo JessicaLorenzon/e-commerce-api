@@ -2,13 +2,16 @@ package com.lorenzon.e_commerce_api.services;
 
 import com.lorenzon.e_commerce_api.dto.CartItemRequestDTO;
 import com.lorenzon.e_commerce_api.dto.CartResponseDTO;
+import com.lorenzon.e_commerce_api.dto.OrderResponseDTO;
 import com.lorenzon.e_commerce_api.entities.cart.Cart;
 import com.lorenzon.e_commerce_api.entities.cartItem.CartItem;
+import com.lorenzon.e_commerce_api.entities.order.Order;
 import com.lorenzon.e_commerce_api.entities.product.Product;
 import com.lorenzon.e_commerce_api.entities.user.User;
 import com.lorenzon.e_commerce_api.exceptions.CartOrItemNotFoundException;
 import com.lorenzon.e_commerce_api.exceptions.InsufficientStockException;
 import com.lorenzon.e_commerce_api.mappers.CartMapper;
+import com.lorenzon.e_commerce_api.mappers.OrderMapper;
 import com.lorenzon.e_commerce_api.repositories.CartItemRepository;
 import com.lorenzon.e_commerce_api.repositories.CartRepository;
 import com.lorenzon.e_commerce_api.repositories.UserRepository;
@@ -35,13 +38,19 @@ public class CartService {
     private ProductService productService;
 
     @Autowired
-    private CartMapper mapper;
+    private OrderService orderService;
+
+    @Autowired
+    private CartMapper cartMapper;
+
+    @Autowired
+    private OrderMapper orderMapper;
 
     @Transactional(readOnly = true)
     public CartResponseDTO getCart() {
         User user = getLoggedUser();
         Cart cart = getOrCreateCart(user);
-        return mapper.toCartResponseDTO(cart);
+        return cartMapper.toCartResponseDTO(cart);
     }
 
     @Transactional
@@ -56,18 +65,17 @@ public class CartService {
             existingItem.setQuantity(newQuantity);
         } else {
             validateStock(product, cartItemRequestDTO.quantity());
-            CartItem cartItem = mapper.toCartItem(cartItemRequestDTO);
+            CartItem cartItem = cartMapper.toCartItem(cartItemRequestDTO);
             cartItem.setProduct(product);
             cart.addItem(cartItem);
         }
         cart = cartRepository.save(cart);
-        return mapper.toCartResponseDTO(cart);
+        return cartMapper.toCartResponseDTO(cart);
     }
 
     @Transactional
     public CartResponseDTO update(CartItemRequestDTO cartItemRequestDTO) {
-        User user = getLoggedUser();
-        Cart cart = user.getCart();
+        Cart cart = findCartByUser();
         if (cart == null) {
             throw new CartOrItemNotFoundException();
         }
@@ -79,14 +87,26 @@ public class CartService {
         validateStock(product, cartItemRequestDTO.quantity());
         existingItem.setQuantity(cartItemRequestDTO.quantity());
         cartRepository.save(cart);
-        return mapper.toCartResponseDTO(cart);
+        return cartMapper.toCartResponseDTO(cart);
     }
 
     @Transactional
     public void delete(Long productId) {
-        User user = getLoggedUser();
-        Cart cart = user.getCart();
+        Cart cart = findCartByUser();
         cartItemRepository.deleteByCartIdAndProductId(cart.getId(), productId);
+    }
+
+    @Transactional
+    public OrderResponseDTO checkout() {
+        Cart cart = findCartByUser();
+        Order order = orderService.createOrder(cart);
+        cart.getItems().clear();
+        return orderMapper.toResponseDTO(order);
+    }
+
+    private Cart findCartByUser() {
+        User user = getLoggedUser();
+        return user.getCart();
     }
 
     private Cart getOrCreateCart(User user) {
