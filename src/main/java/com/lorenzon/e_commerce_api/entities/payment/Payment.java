@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
 
@@ -20,7 +22,14 @@ public class Payment {
     @Id
     private Long id;
 
-    private Instant moment;
+    @CreationTimestamp
+    private Instant createdAt;
+
+    @UpdateTimestamp
+    private Instant updatedAt;
+
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus status;
 
     @OneToOne
     @MapsId

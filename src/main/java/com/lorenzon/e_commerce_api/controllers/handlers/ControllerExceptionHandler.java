@@ -38,15 +38,6 @@ public class ControllerExceptionHandler {
         return problemDetail;
     }
 
-    @ExceptionHandler(CartOrItemNotFoundException.class)
-    public ProblemDetail cartOrItemNotFoundException(CartOrItemNotFoundException e) {
-        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
-        problemDetail.setTitle("Not Found");
-        problemDetail.setDetail(e.getMessage());
-        problemDetail.setType(URI.create("https://e-commerce-api.com/errors/not-found"));
-        return problemDetail;
-    }
-
     @ExceptionHandler(UserForbiddenException.class)
     public ProblemDetail userForbiddenException(UserForbiddenException e) {
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.FORBIDDEN);

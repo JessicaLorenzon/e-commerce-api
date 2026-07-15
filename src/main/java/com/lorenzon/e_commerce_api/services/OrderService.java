@@ -15,7 +15,6 @@ import com.lorenzon.e_commerce_api.exceptions.ResourceNotFoundException;
 import com.lorenzon.e_commerce_api.exceptions.UserForbiddenException;
 import com.lorenzon.e_commerce_api.mappers.OrderMapper;
 import com.lorenzon.e_commerce_api.repositories.OrderRepository;
-import com.lorenzon.e_commerce_api.repositories.ProductRepository;
 import com.lorenzon.e_commerce_api.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -34,9 +33,6 @@ public class OrderService {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private ProductRepository productRepository;
 
     @Autowired
     private OrderMapper mapper;
@@ -95,7 +91,7 @@ public class OrderService {
     }
 
     private Order findEntityById(Long id) {
-        return orderRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Order", id));
+        return orderRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Order with ID " + id + " not found"));
     }
 
     private void updateStock(Product product, Integer quantity) {

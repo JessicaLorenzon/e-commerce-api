@@ -27,25 +27,20 @@ public class CartController {
 
     @PostMapping
     public ResponseEntity<CartResponseDTO> insertItemCart(@RequestBody @Valid CartItemRequestDTO cartItemRequestDTO) {
-        CartResponseDTO responseDTO = service.insert(cartItemRequestDTO);
+        CartResponseDTO responseDTO = service.insertItem(cartItemRequestDTO);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(responseDTO.id()).toUri();
         return ResponseEntity.created(uri).body(responseDTO);
     }
 
     @PutMapping
     public ResponseEntity<CartResponseDTO> updateItemCart(@RequestBody @Valid CartItemRequestDTO cartItemRequestDTO) {
-        CartResponseDTO responseDTO = service.update(cartItemRequestDTO);
+        CartResponseDTO responseDTO = service.updateItem(cartItemRequestDTO);
         return ResponseEntity.ok(responseDTO);
     }
 
     @DeleteMapping("/{productId}")
     public ResponseEntity<Void> deleteItemCart(@PathVariable Long productId) {
-        service.delete(productId);
+        service.deleteItem(productId);
         return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/checkout")
-    public ResponseEntity<OrderResponseDTO> checkout() {
-        return ResponseEntity.ok(service.checkout());
     }
 }
