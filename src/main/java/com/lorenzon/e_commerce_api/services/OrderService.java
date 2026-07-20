@@ -47,11 +47,11 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public OrderResponseDTO findById(Long id) {
+    public Order findById(Long id) {
         User user = getLoggedUser();
         Order order = findEntityById(id);
         validateAccess(order, user);
-        return mapper.toResponseDTO(order);
+        return order;
     }
 
     @Transactional

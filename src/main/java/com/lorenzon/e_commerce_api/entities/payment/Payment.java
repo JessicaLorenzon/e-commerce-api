@@ -2,6 +2,8 @@ package com.lorenzon.e_commerce_api.entities.payment;
 
 import com.lorenzon.e_commerce_api.entities.order.Order;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,17 +24,23 @@ public class Payment {
     @Id
     private Long id;
 
-    @CreationTimestamp
-    private Instant createdAt;
-
-    @UpdateTimestamp
-    private Instant updatedAt;
+    @NotBlank
+    private String stripeSessionId;
 
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
+
+    @NotNull
+    private Long amount;
 
     @OneToOne
     @MapsId
     @JoinColumn(name = "order_id")
     private Order order;
+
+    @CreationTimestamp
+    private Instant createdAt;
+
+    @UpdateTimestamp
+    private Instant updatedAt;
 }

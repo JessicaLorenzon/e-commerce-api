@@ -1,14 +1,11 @@
 package com.lorenzon.e_commerce_api.controllers;
 
-import com.lorenzon.e_commerce_api.dto.OrderRequestDTO;
 import com.lorenzon.e_commerce_api.dto.OrderResponseDTO;
 import com.lorenzon.e_commerce_api.services.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -22,12 +19,6 @@ public class OrderController {
     public ResponseEntity<List<OrderResponseDTO>> findAllOrdersByUser() {
         List<OrderResponseDTO> orderDTOS = service.findAll();
         return ResponseEntity.ok(orderDTOS);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<OrderResponseDTO> findOrderById(@PathVariable Long id) {
-        OrderResponseDTO responseDTO = service.findById(id);
-        return ResponseEntity.ok(responseDTO);
     }
 
     @PatchMapping("/{id}")
