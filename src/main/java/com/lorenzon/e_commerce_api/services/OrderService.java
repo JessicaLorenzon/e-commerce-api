@@ -6,13 +6,14 @@ import com.lorenzon.e_commerce_api.entities.cartItem.CartItem;
 import com.lorenzon.e_commerce_api.entities.order.Order;
 import com.lorenzon.e_commerce_api.entities.order.OrderStatus;
 import com.lorenzon.e_commerce_api.entities.orderItem.OrderItem;
+import com.lorenzon.e_commerce_api.entities.payment.PaymentStatus;
 import com.lorenzon.e_commerce_api.entities.product.Product;
 import com.lorenzon.e_commerce_api.entities.user.User;
 import com.lorenzon.e_commerce_api.entities.user.UserRole;
-import com.lorenzon.e_commerce_api.exceptions.AlreadyCanceledException;
+import com.lorenzon.e_commerce_api.exceptions.BusinessException;
+import com.lorenzon.e_commerce_api.exceptions.ForbiddenException;
 import com.lorenzon.e_commerce_api.exceptions.InsufficientStockException;
 import com.lorenzon.e_commerce_api.exceptions.ResourceNotFoundException;
-import com.lorenzon.e_commerce_api.exceptions.UserForbiddenException;
 import com.lorenzon.e_commerce_api.infra.security.AuthenticatedUserService;
 import com.lorenzon.e_commerce_api.mappers.OrderMapper;
 import com.lorenzon.e_commerce_api.repositories.OrderRepository;
@@ -45,33 +46,36 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public Order findById(Long id) {
+    public OrderResponseDTO findById(Long id) {
         User user = authenticatedUserService.getLoggedUser();
         Order order = findEntityById(id);
         validateAccess(order, user);
-        return order;
-    }
-
-    @Transactional
-    public Order createOrder(Cart cart) {
-        Order order = buildOrder(cart);
-        return orderRepository.save(order);
+        return mapper.toResponseDTO(order);
     }
 
     @Transactional
     public OrderResponseDTO cancel(Long id) {
         User user = authenticatedUserService.getLoggedUser();
         Order order = findEntityById(id);
-        if (order.getStatus() == OrderStatus.CANCELED) {
-            throw new AlreadyCanceledException();
-        }
         validateAccess(order, user);
+        if (order.getStatus() == OrderStatus.CANCELED) {
+            throw new BusinessException("Order has already been cancelled");
+        }
+        if (order.getPayment().getStatus() == PaymentStatus.SUCCESS) {
+            throw new BusinessException("It is not possible cancel an order already paid");
+        }
         for (OrderItem orderItem : order.getItems()) {
             Product product = orderItem.getProduct();
             product.setStockQuantity(product.getStockQuantity() + orderItem.getQuantity());
         }
         order.setStatus(OrderStatus.CANCELED);
         return mapper.toResponseDTO(order);
+    }
+
+    @Transactional
+    public Order createOrder(Cart cart) {
+        Order order = buildOrder(cart);
+        return orderRepository.save(order);
     }
 
     public Order buildOrder(Cart cart) {
@@ -88,7 +92,8 @@ public class OrderService {
         return order;
     }
 
-    private Order findEntityById(Long id) {
+    @Transactional(readOnly = true)
+    public Order findEntityById(Long id) {
         return orderRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Order with ID " + id + " not found"));
     }
 
@@ -103,7 +108,7 @@ public class OrderService {
         boolean isAdmin = user.getRole() == UserRole.ADMIN;
         boolean isOwner = order.getUser().getId().equals(user.getId());
         if (!isAdmin && !isOwner) {
-            throw new UserForbiddenException();
+            throw new ForbiddenException();
         }
     }
 }

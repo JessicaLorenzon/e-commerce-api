@@ -16,9 +16,15 @@ public class OrderController {
     private OrderService service;
 
     @GetMapping
-    public ResponseEntity<List<OrderResponseDTO>> findAllOrdersByUser() {
+    public ResponseEntity<List<OrderResponseDTO>> findAllOrders() {
         List<OrderResponseDTO> orderDTOS = service.findAll();
         return ResponseEntity.ok(orderDTOS);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<OrderResponseDTO> findById(@PathVariable Long id) {
+        OrderResponseDTO orderDTO = service.findById(id);
+        return ResponseEntity.ok(orderDTO);
     }
 
     @PatchMapping("/{id}")

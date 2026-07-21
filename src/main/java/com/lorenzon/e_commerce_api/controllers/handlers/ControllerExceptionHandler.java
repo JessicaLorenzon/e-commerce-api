@@ -39,8 +39,8 @@ public class ControllerExceptionHandler {
         return problemDetail;
     }
 
-    @ExceptionHandler(UserForbiddenException.class)
-    public ProblemDetail userForbiddenException(UserForbiddenException e) {
+    @ExceptionHandler(ForbiddenException.class)
+    public ProblemDetail userForbiddenException(ForbiddenException e) {
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.FORBIDDEN);
         problemDetail.setTitle("Forbidden");
         problemDetail.setDetail(e.getMessage());
