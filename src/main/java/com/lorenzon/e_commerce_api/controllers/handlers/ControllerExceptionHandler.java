@@ -3,6 +3,7 @@ package com.lorenzon.e_commerce_api.controllers.handlers;
 import com.lorenzon.e_commerce_api.exceptions.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -44,6 +45,24 @@ public class ControllerExceptionHandler {
         problemDetail.setTitle("Forbidden");
         problemDetail.setDetail(e.getMessage());
         problemDetail.setType(URI.create("https://e-commerce-api.com/errors/user-forbidden"));
+        return problemDetail;
+    }
+
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ProblemDetail userAlreadyExistsException(UserAlreadyExistsException e) {
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.CONFLICT);
+        problemDetail.setTitle("User conflict");
+        problemDetail.setDetail(e.getMessage());
+        problemDetail.setType(URI.create("https://e-commerce-api.com/errors/user-conflict"));
+        return problemDetail;
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ProblemDetail methodArgumentNotValidException(MethodArgumentNotValidException e) {
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        problemDetail.setTitle("Invalid fields");
+        problemDetail.setDetail("Field(s) with invalid value(s)");
+        problemDetail.setType(URI.create("https://e-commerce-api.com/errors/invalid-fields"));
         return problemDetail;
     }
 }

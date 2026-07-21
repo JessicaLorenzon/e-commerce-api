@@ -1,5 +1,7 @@
 package com.lorenzon.e_commerce_api.infra.security;
 
+import com.lorenzon.e_commerce_api.exceptions.CustomAccessDeniedHandler;
+import com.lorenzon.e_commerce_api.exceptions.CustomAuthenticationEntryPoint;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,6 +24,12 @@ public class SecurityConfigurations {
     @Autowired
     SecurityFilter securityFilter;
 
+    @Autowired
+    CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+
+    @Autowired
+    CustomAccessDeniedHandler customAccessDeniedHandler;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
@@ -32,6 +40,10 @@ public class SecurityConfigurations {
                         .requestMatchers("/auth/login").permitAll()
                         .requestMatchers("/payments/webhook").permitAll()
                         .anyRequest().authenticated()
+                )
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+                        .accessDeniedHandler(customAccessDeniedHandler)
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

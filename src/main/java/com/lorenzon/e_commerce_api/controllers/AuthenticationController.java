@@ -5,6 +5,7 @@ import com.lorenzon.e_commerce_api.dto.UserLoginResponseDTO;
 import com.lorenzon.e_commerce_api.dto.UserRegisterDTO;
 import com.lorenzon.e_commerce_api.entities.user.User;
 import com.lorenzon.e_commerce_api.entities.user.UserRole;
+import com.lorenzon.e_commerce_api.exceptions.UserAlreadyExistsException;
 import com.lorenzon.e_commerce_api.infra.security.TokenService;
 import com.lorenzon.e_commerce_api.repositories.UserRepository;
 import jakarta.validation.Valid;
@@ -36,7 +37,7 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     public ResponseEntity<UserLoginResponseDTO> register(@RequestBody @Valid UserRegisterDTO data) {
-        if (userRepository.findByEmail(data.email()) != null) return ResponseEntity.badRequest().build();
+        if (userRepository.findByEmail(data.email()) != null) throw new UserAlreadyExistsException();
         String encryptedPassword = passwordEncoder.encode(data.password());
         User newUser = new User(data.fullName(), data.email(), encryptedPassword, UserRole.USER);
         userRepository.save(newUser);
