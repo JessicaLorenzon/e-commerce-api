@@ -13,17 +13,15 @@ import com.lorenzon.e_commerce_api.exceptions.AlreadyCanceledException;
 import com.lorenzon.e_commerce_api.exceptions.InsufficientStockException;
 import com.lorenzon.e_commerce_api.exceptions.ResourceNotFoundException;
 import com.lorenzon.e_commerce_api.exceptions.UserForbiddenException;
+import com.lorenzon.e_commerce_api.infra.security.AuthenticatedUserService;
 import com.lorenzon.e_commerce_api.mappers.OrderMapper;
 import com.lorenzon.e_commerce_api.repositories.OrderRepository;
-import com.lorenzon.e_commerce_api.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 public class OrderService {
@@ -32,14 +30,14 @@ public class OrderService {
     private OrderRepository orderRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private OrderMapper mapper;
 
     @Autowired
-    private OrderMapper mapper;
+    private AuthenticatedUserService authenticatedUserService;
 
     @Transactional(readOnly = true)
     public List<OrderResponseDTO> findAll() {
-        User user = getLoggedUser();
+        User user = authenticatedUserService.getLoggedUser();
         List<Order> orders = user.getRole() == UserRole.ADMIN
                 ? orderRepository.findAll()
                 : orderRepository.findAllByUser(user);
@@ -48,7 +46,7 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public Order findById(Long id) {
-        User user = getLoggedUser();
+        User user = authenticatedUserService.getLoggedUser();
         Order order = findEntityById(id);
         validateAccess(order, user);
         return order;
@@ -62,7 +60,7 @@ public class OrderService {
 
     @Transactional
     public OrderResponseDTO cancel(Long id) {
-        User user = getLoggedUser();
+        User user = authenticatedUserService.getLoggedUser();
         Order order = findEntityById(id);
         if (order.getStatus() == OrderStatus.CANCELED) {
             throw new AlreadyCanceledException();
@@ -107,10 +105,5 @@ public class OrderService {
         if (!isAdmin && !isOwner) {
             throw new UserForbiddenException();
         }
-    }
-
-    private User getLoggedUser() {
-        String email = Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getName();
-        return (User) userRepository.findByEmail(email);
     }
 }

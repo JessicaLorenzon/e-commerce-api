@@ -7,16 +7,13 @@ import com.lorenzon.e_commerce_api.entities.payment.Payment;
 import com.lorenzon.e_commerce_api.entities.payment.PaymentStatus;
 import com.lorenzon.e_commerce_api.entities.user.User;
 import com.lorenzon.e_commerce_api.exceptions.ResourceNotFoundException;
+import com.lorenzon.e_commerce_api.infra.security.AuthenticatedUserService;
 import com.lorenzon.e_commerce_api.repositories.PaymentRepository;
-import com.lorenzon.e_commerce_api.repositories.UserRepository;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Objects;
 
 @Service
 public class PaymentService {
@@ -25,17 +22,17 @@ public class PaymentService {
     private PaymentRepository paymentRepository;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
     private OrderService orderService;
 
     @Autowired
     private StripeService stripeService;
 
+    @Autowired
+    private AuthenticatedUserService authenticatedUserService;
+
     @Transactional
     public String checkout() throws StripeException {
-        User user = getLoggedUser();
+        User user = authenticatedUserService.getLoggedUser();
         Cart cart = user.getCart();
         Order order = orderService.createOrder(cart);
         Session session = stripeService.createSession(order);
@@ -62,10 +59,4 @@ public class PaymentService {
         Payment payment = paymentRepository.findByOrderId(orderId).orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
         payment.setStatus(PaymentStatus.FAILED);
     }
-
-    private User getLoggedUser() {
-        String email = Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getName();
-        return (User) userRepository.findByEmail(email);
-    }
-
 }

@@ -8,16 +8,13 @@ import com.lorenzon.e_commerce_api.entities.product.Product;
 import com.lorenzon.e_commerce_api.entities.user.User;
 import com.lorenzon.e_commerce_api.exceptions.InsufficientStockException;
 import com.lorenzon.e_commerce_api.exceptions.ResourceNotFoundException;
+import com.lorenzon.e_commerce_api.infra.security.AuthenticatedUserService;
 import com.lorenzon.e_commerce_api.mappers.CartMapper;
 import com.lorenzon.e_commerce_api.repositories.CartItemRepository;
 import com.lorenzon.e_commerce_api.repositories.CartRepository;
-import com.lorenzon.e_commerce_api.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Objects;
 
 @Service
 public class CartService {
@@ -26,27 +23,27 @@ public class CartService {
     private CartRepository cartRepository;
 
     @Autowired
-    private CartItemRepository cartItemRepository;
+    private CartMapper cartMapper;
 
     @Autowired
-    private UserRepository userRepository;
+    private CartItemRepository cartItemRepository;
 
     @Autowired
     private ProductService productService;
 
     @Autowired
-    private CartMapper cartMapper;
+    private AuthenticatedUserService authenticatedUserService;
 
     @Transactional(readOnly = true)
     public CartResponseDTO getCart() {
-        User user = getLoggedUser();
+        User user = authenticatedUserService.getLoggedUser();
         Cart cart = getOrCreateCart(user);
         return cartMapper.toCartResponseDTO(cart);
     }
 
     @Transactional
     public CartResponseDTO insertItem(CartItemRequestDTO cartItemRequestDTO) {
-        User user = getLoggedUser();
+        User user = authenticatedUserService.getLoggedUser();
         Cart cart = getOrCreateCart(user);
         Product product = productService.findById(cartItemRequestDTO.productId());
         CartItem existingItem = cartItemRepository.findByCartIdAndProductId(cart.getId(), product.getId());
@@ -88,7 +85,7 @@ public class CartService {
     }
 
     private Cart findCartByUser() {
-        User user = getLoggedUser();
+        User user = authenticatedUserService.getLoggedUser();
         return user.getCart();
     }
 
@@ -105,10 +102,5 @@ public class CartService {
         if (product.getStockQuantity() < quantity) {
             throw new InsufficientStockException(product.getName());
         }
-    }
-
-    private User getLoggedUser() {
-        String email = Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getName();
-        return (User) userRepository.findByEmail(email);
     }
 }
