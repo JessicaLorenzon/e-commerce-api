@@ -65,12 +65,12 @@ public class CartService {
     public CartResponseDTO updateItem(CartItemRequestDTO cartItemRequestDTO) {
         Cart cart = findCartByUser();
         if (cart == null) {
-            throw new ResourceNotFoundException("Cart or Item not found");
+            throw new ResourceNotFoundException("Cart not found");
         }
         Product product = productService.findById(cartItemRequestDTO.productId());
         CartItem existingItem = cartItemRepository.findByCartIdAndProductId(cart.getId(), product.getId());
         if (existingItem == null) {
-            throw new ResourceNotFoundException("Cart or Item not found");
+            throw new ResourceNotFoundException("Item with ID " + product.getId() + " not found");
         }
         validateStock(product, cartItemRequestDTO.quantity());
         existingItem.setQuantity(cartItemRequestDTO.quantity());
@@ -81,7 +81,12 @@ public class CartService {
     @Transactional
     public void deleteItem(Long productId) {
         Cart cart = findCartByUser();
-        cartItemRepository.deleteByCartIdAndProductId(cart.getId(), productId);
+        Product product = productService.findById(productId);
+        CartItem existingItem = cartItemRepository.findByCartIdAndProductId(cart.getId(), product.getId());
+        if (existingItem == null) {
+            throw new ResourceNotFoundException("Item with ID " + productId + " not found");
+        }
+        cartItemRepository.delete(existingItem);
     }
 
     private Cart findCartByUser() {
