@@ -16,5 +16,6 @@ public interface OrderMapper {
     OrderItemResponseDTO toOrderItemResponseDTO(OrderItem orderItem);
 
     @Mapping(target = "total", expression = "java(order.getTotal())")
+    @Mapping(target = "userId", source = "user.id")
     OrderResponseDTO toResponseDTO(Order order);
 }

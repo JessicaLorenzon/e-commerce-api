@@ -59,9 +59,9 @@ public class OrderService {
         Order order = findEntityById(id);
         validateAccess(order, user);
         if (order.getStatus() == OrderStatus.CANCELED) {
-            throw new BusinessException("Order has already been cancelled");
+            throw new BusinessException("Order has already been canceled");
         }
-        if (order.getPayment().getStatus() == PaymentStatus.SUCCESS) {
+        if (order.getPayment() != null && order.getPayment().getStatus() == PaymentStatus.SUCCESS) {
             throw new BusinessException("It is not possible cancel an order already paid");
         }
         for (OrderItem orderItem : order.getItems()) {

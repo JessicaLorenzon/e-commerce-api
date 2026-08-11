@@ -30,15 +30,6 @@ public class ControllerExceptionHandler {
         return problemDetail;
     }
 
-    @ExceptionHandler(AlreadyCanceledException.class)
-    public ProblemDetail alreadyCanceledException(AlreadyCanceledException e) {
-        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-        problemDetail.setTitle("Already canceled");
-        problemDetail.setDetail(e.getMessage());
-        problemDetail.setType(URI.create("https://e-commerce-api.com/errors/business-exception"));
-        return problemDetail;
-    }
-
     @ExceptionHandler(ForbiddenException.class)
     public ProblemDetail userForbiddenException(ForbiddenException e) {
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.FORBIDDEN);
@@ -54,6 +45,15 @@ public class ControllerExceptionHandler {
         problemDetail.setTitle("User conflict");
         problemDetail.setDetail(e.getMessage());
         problemDetail.setType(URI.create("https://e-commerce-api.com/errors/user-conflict"));
+        return problemDetail;
+    }
+
+    @ExceptionHandler(BusinessException.class)
+    public ProblemDetail businessException(BusinessException e) {
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        problemDetail.setTitle("Business exception");
+        problemDetail.setDetail(e.getMessage());
+        problemDetail.setType(URI.create("https://e-commerce-api.com/errors/business-exception"));
         return problemDetail;
     }
 
