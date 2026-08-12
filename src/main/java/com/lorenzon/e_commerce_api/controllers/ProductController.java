@@ -36,7 +36,7 @@ public class ProductController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ProductResponseAdminDTO> saveProduct(@RequestBody ProductRequestDTO productRequestDTO) {
+    public ResponseEntity<ProductResponseAdminDTO> insertProduct(@RequestBody @Valid ProductRequestDTO productRequestDTO) {
         ProductResponseAdminDTO responseDTO = service.insert(productRequestDTO);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(responseDTO.id()).toUri();
         return ResponseEntity.created(uri).body(responseDTO);
