@@ -1,6 +1,6 @@
 package com.lorenzon.e_commerce_api.controllers;
 
-import com.lorenzon.e_commerce_api.tests.TokenUtil;
+import com.lorenzon.e_commerce_api.factories.TokenUtil;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -1,4 +1,4 @@
-package com.lorenzon.e_commerce_api.tests;
+package com.lorenzon.e_commerce_api.factories;
 
 import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
