@@ -68,7 +68,7 @@ public class CartServiceTest {
         cart = CartFactory.createCart(user);
         product = ProductFactory.createProduct();
         request = CartItemRequestFactory.createRequest();
-        cartItem = CartItemFactory.createCartItem();
+        cartItem = CartItemFactory.createCartItem(product, 2);
 
         itemResponse = new CartItemResponseDTO(1L, "Product 1", 2, new BigDecimal("200.00"));
         responseDTO = new CartResponseDTO(1L, List.of(itemResponse), new BigDecimal("200.00"));
