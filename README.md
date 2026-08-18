@@ -1,6 +1,6 @@
 # E-commerce API
 
-Projeto baseado no roadmap de projetos do [roadmap.sh](https://roadmap.sh/projects/ecommerce-api), com o objetivo de praticar desenvolvimento de APIs RESTful com Java, autenticação de usuários, processamento de pedidos e integração com serviços externos.
+Projeto baseado no roadmap de projetos do [roadmap.sh](https://roadmap.sh/projects/ecommerce-api), com o objetivo de praticar desenvolvimento de APIs RESTful com Java, autenticação de usuários, processamento de pedidos, integração com serviços externos e testes automatizados.
 
 ## Descrição
 
@@ -35,6 +35,7 @@ A aplicação integra o **Stripe** para processamento de pagamentos online e uti
 - **Stripe API** – Processamento de pagamentos
 - **Stripe Webhooks** – Atualização automática do status dos pagamentos
 - **Maven** – Gerenciador de dependências
+- **JUnit / Mockito / RestAssured** – Testes unitários e de integração
 
 ## Como rodar o projeto
 
